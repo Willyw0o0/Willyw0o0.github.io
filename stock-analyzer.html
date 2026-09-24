@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Historical Stock Market Algorithm Analyzer</title>
+<style>
+  :root {
+    --paper: #F6F3EC;
+    --ink: #1E2A22;
+    --ink-soft: #4A5A4E;
+    --line: #D8D2C2;
+    --signal: #2F6F4F;
+    --signal-soft: #E4EEE7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Georgia, 'Times New Roman', serif;
+    line-height: 1.55;
+  }
+  .mono {
+    font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 0.02em;
+  }
+  header {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 5rem 1.5rem 2rem;
+  }
+  .tag {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+    color: var(--signal);
+    margin-bottom: 1rem;
+  }
+  h1 {
+    font-size: 2.6rem;
+    line-height: 1.15;
+    margin: 0 0 1.2rem;
+    font-weight: 400;
+  }
+  .lede {
+    font-size: 1.15rem;
+    color: var(--ink-soft);
+    max-width: 60ch;
+  }
+
+  .chart {
+    max-width: 720px;
+    margin: 1rem auto 3rem;
+    padding: 0 1.5rem;
+  }
+  svg { width: 100%; height: auto; display: block; }
+
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 1.5rem 5rem;
+  }
+  section {
+    padding: 2.5rem 0;
+    border-top: 1px solid var(--line);
+  }
+  h2 {
+    font-size: 1.05rem;
+    font-family: 'Courier New', Courier, monospace;
+    color: var(--signal);
+    margin: 0 0 1rem;
+    font-weight: normal;
+  }
+  p { max-width: 62ch; }
+  .stocks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1rem;
+  }
+  .stock {
+    font-family: 'Courier New', Courier, monospace;
+    background: var(--signal-soft);
+    border: 1px solid var(--line);
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  .stock b { color: var(--signal); }
+  ul.strategies {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+  }
+  ul.strategies li {
+    padding: 0.6rem 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  ul.strategies li:last-child { border-bottom: none; }
+  .status {
+    display: inline-block;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+    background: var(--signal-soft);
+    color: var(--signal);
+    padding: 0.3rem 0.7rem;
+    margin-top: 0.5rem;
+  }
+  footer {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+  a { color: var(--ink); }
+  a.repo {
+    color: var(--signal);
+    font-family: 'Courier New', Courier, monospace;
+    text-decoration: none;
+    border-bottom: 1px solid var(--signal);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #171A16;
+      --ink: #E9E7DE;
+      --ink-soft: #A7AC9F;
+      --line: #333B31;
+      --signal: #6FBE93;
+      --signal-soft: #1F2B22;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #171A16;
+    --ink: #E9E7DE;
+    --ink-soft: #A7AC9F;
+    --line: #333B31;
+    --signal: #6FBE93;
+    --signal-soft: #1F2B22;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="tag mono">AAPL · TSLA · INTC · MSFT</div>
+  <h1>Does the rule beat just holding?</h1>
+  <p class="lede">A backtesting project that tests rule-based trading strategies against historical price data, then checks whether they actually beat buying and doing nothing.</p>
+</header>
+
+<div class="chart">
+  <svg viewBox="0 0 680 160" preserveAspectRatio="none">
+    <polyline fill="none" stroke="#D8D2C2" stroke-width="2"
+      points="0,120 60,100 120,110 180,80 240,90 300,60 360,70 420,40 480,55 540,30 600,45 680,20" />
+    <polyline fill="none" stroke="#2F6F4F" stroke-width="2.5"
+      points="0,130 60,120 120,115 180,105 240,95 300,88 360,78 420,68 480,60 540,50 600,42 680,30" />
+    <circle cx="360" cy="78" r="4" fill="#2F6F4F" />
+    <circle cx="360" cy="70" r="4" fill="#2F6F4F" fill-opacity="0.3" />
+  </svg>
+</div>
+
+<main>
+
+  <section>
+    <h2>the idea</h2>
+    <p>Most people assume active trading beats holding. This project doesn't assume &mdash; it tests. A strategy is a fixed, repeatable rule for buying and selling. The backtester replays that rule against years of real price data, day by day, then compares the outcome to a simple buy-and-hold baseline on the same stock and period.</p>
+  </section>
+
+  <section>
+    <h2>strategies</h2>
+    <ul class="strategies">
+      <li><b>Moving average crossover</b> &mdash; buys when a short-term average price crosses above a long-term average, sells when it crosses below.</li>
+      <li>RSI, MACD, and Bollinger Bands planned as the project expands.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>stocks</h2>
+    <p>Daily OHLCV data, aligned to a shared window from July 2010 through March 2020.</p>
+    <div class="stocks">
+      <div class="stock"><b>AAPL</b> &mdash; stable large&#8209;cap</div>
+      <div class="stock"><b>TSLA</b> &mdash; volatile growth</div>
+      <div class="stock"><b>INTC</b> &mdash; semiconductor</div>
+      <div class="stock"><b>MSFT</b> &mdash; stable large&#8209;cap</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>metrics</h2>
+    <p>Each strategy is scored on total return, max drawdown, win rate, and Sharpe ratio &mdash; then measured against what buy-and-hold would have returned over the same stretch.</p>
+  </section>
+
+  <section>
+    <h2>status</h2>
+    <p>Data loading and alignment are done. Backtesting engine in progress.</p>
+    <div class="status">in development</div>
+  </section>
+
+</main>
+
+<footer>
+  Built as a personal learning project. Source on
+  <a class="repo" href="#">GitHub</a>.
+</footer>
+
+</body>
+</html>
